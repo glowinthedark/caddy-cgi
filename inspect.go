@@ -25,14 +25,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/caddyserver/caddy/caddyhttp/httpserver"
+	"github.com/caddyserver/caddy/v2"
 )
 
 type kvType struct {
 	key, val string
 }
 
-func inspect(hnd cgi.Handler, w http.ResponseWriter, req *http.Request, rep httpserver.Replacer) {
+func inspect(hnd cgi.Handler, w http.ResponseWriter, req *http.Request, rep *caddy.Replacer) {
 	var buf bytes.Buffer
 
 	printf := func(format string, args ...interface{}) {
@@ -82,7 +82,7 @@ func inspect(hnd cgi.Handler, w http.ResponseWriter, req *http.Request, rep http
 	repPrint := func(prms ...string) {
 		printf("Placeholders\n")
 		for _, prm := range prms {
-			kvPrint("  ", prm, rep.Replace(prm))
+			kvPrint("  ", prm, rep.ReplaceAll(prm, ""))
 		}
 	}
 
