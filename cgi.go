@@ -21,64 +21,12 @@ import (
 	"net/http"
 	"net/http/cgi"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 )
-
-// match returns true if the request string (reqStr) matches the pattern string
-// (patternStr), false otherwise. If true is returned, it is followed by the
-// prefix that matches the pattern and the unmatched portion to its right.
-// patternStr uses glob notation; see path/Match for matching details. If the
-// pattern is invalid (for example, contains an unpaired "["), false is
-// returned.
-func match(requestStr string, patterns []string) (ok bool, prefixStr, suffixStr string) {
-	var str, last string
-	var err error
-	ln := len(patterns)
-	for j := 0; j < ln && !ok; j++ {
-		pattern := patterns[j]
-		str = requestStr
-		last = ""
-		for last != str && !ok && err == nil {
-			ok, err = path.Match(pattern, str)
-			if err == nil {
-				if ok {
-					prefixStr = str
-					suffixStr = requestStr[len(str):]
-				} else {
-					last = str
-					str = filepath.Dir(str)
-				}
-			}
-		}
-	}
-	return
-}
-
-// excluded returns true if the request string (reqStr) matches any of the
-// pattern strings (patterns), false otherwise. patterns use glob notation; see
-// path/Match for matching details. If the pattern is invalid (for example,
-// contains an unpaired "["), false is returned.
-func excluded(reqStr string, patterns []string) (ok bool) {
-	var err error
-	var match bool
-
-	ln := len(patterns)
-	for j := 0; j < ln && !ok; j++ {
-		match, err = path.Match(patterns[j], reqStr)
-		if err == nil {
-			if match {
-				ok = true
-				// fmt.Printf("[%s] is excluded by rule [%s]\n", reqStr, patterns[j])
-			}
-		}
-	}
-	return
-}
 
 // currentDir returns the current working directory
 func currentDir() (wdStr string) {
@@ -112,9 +60,9 @@ func (c CGI) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Ha
 
 	cgiHandler.Root = "/"
 
-	cgiHandler.Dir = c.dir
-	cgiHandler.Path = repl.ReplaceAll(c.exe, "")
-	for _, str := range c.args {
+	cgiHandler.Dir = c.WorkingDirectory
+	cgiHandler.Path = repl.ReplaceAll(c.Executable, "")
+	for _, str := range c.Args {
 		cgiHandler.Args = append(cgiHandler.Args, repl.ReplaceAll(str, ""))
 	}
 
@@ -127,17 +75,17 @@ func (c CGI) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Ha
 	envAdd("SCRIPT_NAME", r.URL.Path) // TODO: split according to matcher?
 	cgiHandler.Env = append(cgiHandler.Env, "REMOTE_USER="+username)
 
-	for _, e := range c.envs {
+	for _, e := range c.Envs {
 		cgiHandler.Env = append(cgiHandler.Env, repl.ReplaceAll(e, ""))
 	}
 
-	if c.passAll {
+	if c.PassAll {
 		cgiHandler.InheritEnv = passAll()
 	} else {
-		cgiHandler.InheritEnv = append(cgiHandler.InheritEnv, c.passEnvs...)
+		cgiHandler.InheritEnv = append(cgiHandler.InheritEnv, c.PassEnvs...)
 	}
 
-	if c.inspect {
+	if c.Inspect {
 		inspect(cgiHandler, w, r, repl)
 	} else {
 		cgiHandler.ServeHTTP(w, r)
