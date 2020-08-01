@@ -56,9 +56,14 @@ func (c CGI) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Ha
 		}
 	}
 
+	scriptPath := strings.TrimPrefix(r.URL.Path, c.ScriptName)
+
 	var cgiHandler cgi.Handler
 
 	cgiHandler.Root = "/"
+
+	repl.Set("root", cgiHandler.Root)
+	repl.Set("path", scriptPath)
 
 	cgiHandler.Dir = c.WorkingDirectory
 	cgiHandler.Path = repl.ReplaceAll(c.Executable, "")
@@ -70,7 +75,7 @@ func (c CGI) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Ha
 		val = repl.ReplaceAll(val, "")
 		cgiHandler.Env = append(cgiHandler.Env, key+"="+val)
 	}
-	envAdd("PATH_INFO", strings.TrimPrefix(r.URL.Path, c.ScriptName))
+	envAdd("PATH_INFO", scriptPath)
 	envAdd("SCRIPT_FILENAME", cgiHandler.Path)
 	envAdd("SCRIPT_NAME", c.ScriptName)
 	cgiHandler.Env = append(cgiHandler.Env, "REMOTE_USER="+username)

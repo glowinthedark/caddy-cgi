@@ -50,7 +50,7 @@ CGI_LOCAL is unset`,
 		{
 			name: "Inspect",
 			cgi: CGI{
-				Executable: "test/example",
+				Executable: "test/example{path}",
 				ScriptName: "/foo.cgi",
 				Args:       []string{"arg1", "arg2"},
 				Envs:       []string{"some=thing"},
@@ -60,7 +60,7 @@ CGI_LOCAL is unset`,
 			statusCode: 200,
 			responseBody: `CGI for Caddy inspection page
 
-Executable .................... test/example
+Executable .................... test/example/some/path
   Arg 1 ....................... arg1
   Arg 2 ....................... arg2
 Root .......................... /
@@ -68,10 +68,16 @@ Dir ...........................
 Environment
   PATH_INFO ................... /some/path
   REMOTE_USER ................. 
-  SCRIPT_FILENAME ............. test/example
+  SCRIPT_FILENAME ............. test/example/some/path
   SCRIPT_NAME ................. /foo.cgi
   some ........................ thing
-Inherited environment`,
+Inherited environment
+Placeholders
+  {path} ...................... /some/path
+  {root} ...................... /
+  {http.request.host} ......... 
+  {http.request.method} ....... 
+  {http.request.uri.path} .....`,
 		},
 	}
 
