@@ -70,9 +70,9 @@ func (c CGI) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Ha
 		val = repl.ReplaceAll(val, "")
 		cgiHandler.Env = append(cgiHandler.Env, key+"="+val)
 	}
-	envAdd("PATH_INFO", r.URL.Path)
+	envAdd("PATH_INFO", strings.TrimPrefix(r.URL.Path, c.ScriptName))
 	envAdd("SCRIPT_FILENAME", cgiHandler.Path)
-	envAdd("SCRIPT_NAME", r.URL.Path) // TODO: split according to matcher?
+	envAdd("SCRIPT_NAME", c.ScriptName)
 	cgiHandler.Env = append(cgiHandler.Env, "REMOTE_USER="+username)
 
 	for _, e := range c.Envs {

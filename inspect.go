@@ -79,12 +79,12 @@ func inspect(hnd cgi.Handler, w http.ResponseWriter, req *http.Request, rep *cad
 		return
 	}
 
-	repPrint := func(prms ...string) {
-		printf("Placeholders\n")
-		for _, prm := range prms {
-			kvPrint("  ", prm, rep.ReplaceAll(prm, ""))
-		}
-	}
+	//repPrint := func(prms ...string) {
+	//	printf("Placeholders\n")
+	//	for _, prm := range prms {
+	//		kvPrint("  ", prm, rep.ReplaceAll(prm, ""))
+	//	}
+	//}
 
 	kvListPrint := func(kvList []kvType, hdrStr string) {
 		printf("%s\n", hdrStr)
@@ -98,7 +98,7 @@ func inspect(hnd cgi.Handler, w http.ResponseWriter, req *http.Request, rep *cad
 	kvPrint("", "Dir", hnd.Dir)
 	kvListPrint(split(hnd.Env), "Environment")
 	kvListPrint(osEnv(hnd.InheritEnv), "Inherited environment")
-	repPrint("{.}", "{host}", "{match}", "{method}", "{root}", "{when}")
+	//repPrint("{.}", "{host}", "{match}", "{method}", "{root}", "{when}")
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	buf.WriteTo(w)
