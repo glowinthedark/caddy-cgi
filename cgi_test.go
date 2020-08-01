@@ -68,6 +68,7 @@ Dir ...........................
 Environment
   PATH_INFO ................... /some/path
   REMOTE_USER ................. 
+  SCRIPT_EXEC ................. test/example/some/path arg1 arg2
   SCRIPT_FILENAME ............. test/example/some/path
   SCRIPT_NAME ................. /foo.cgi
   some ........................ thing

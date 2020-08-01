@@ -18,6 +18,7 @@
 package cgi
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/cgi"
 	"os"
@@ -78,6 +79,7 @@ func (c CGI) ServeHTTP(w http.ResponseWriter, r *http.Request, next caddyhttp.Ha
 	envAdd("PATH_INFO", scriptPath)
 	envAdd("SCRIPT_FILENAME", cgiHandler.Path)
 	envAdd("SCRIPT_NAME", c.ScriptName)
+	envAdd("SCRIPT_EXEC", fmt.Sprintf("%s %s", cgiHandler.Path, strings.Join(cgiHandler.Args, " ")))
 	cgiHandler.Env = append(cgiHandler.Env, "REMOTE_USER="+username)
 
 	for _, e := range c.Envs {
